@@ -2,27 +2,25 @@
 import { useEffect, useState } from 'react';
 import './App.css';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { library } from '@fortawesome/fontawesome-svg-core'
-// import your icons
-import { fab } from '@fortawesome/free-brands-svg-icons'
-import { fas } from '@fortawesome/free-solid-svg-icons'
-import { far } from '@fortawesome/free-regular-svg-icons'
-
 import CurrencyEditbox from './components/CurrencyEditbox';
+import Button from './components/Button';
 
 function App() {
   
   // variables
-  library.add(fab, fas, far);
   const [currencyContent, setCurrencyContent] = useState({}) // available currencies
   
   const [targetCurrencyCount, setTargetCurrencyCount] = useState(1) // amount of target currency
-  const [useTargetCurrency, setUseTargetCurrency] = useState([true]) // array of true and false
+  const [currentTargetCurrencies, setCurrentTargetCurrencies] = useState([]) // array of true and false
+  const [swapAnimation, setSwapAnimation] = useState(false);
 
   const [sourceCurrency, setSourceCurrency] = useState({})
-  const [targetCurrency, setTargetCurrency] = useState({}) 
+  // const [targetCurrency, setTargetCurrency] = useState({}) 
+  const [sourceCurrencyValue, setSourceCurrencyValue] = useState(0)
+  const [targetCurrencyValue, setTargetCurrencyValue] = useState([])
+  const [currencyPair, setCurrencyPair] = useState({})
 
+  // currency pair data
   // read the currencies file
   useEffect(()=> {
     const fetchCurrencies = async () => {
@@ -57,7 +55,8 @@ function App() {
           break;
         }
         else if (currency.value === "MYR") {
-          setTargetCurrency(currency);
+          // setTargetCurrency(currency);
+          setCurrentTargetCurrencies([currency])
         }
       }
     }
@@ -67,49 +66,131 @@ function App() {
   // add the target currency
   const addCurrency = () => {
     setTargetCurrencyCount(prevCount => prevCount + 1);
-    setUseTargetCurrency((prevUse) => [...prevUse, true]);
+    setCurrentTargetCurrencies((prevUse) => [...prevUse, [...prevUse][0]]);
   }
 
   // remove the target currency
   const removeCurrency = () => {
-    setTargetCurrencyCount(prevCount => prevCount - 1);
-    setUseTargetCurrency((prevUse) => prevUse.slice(0, prevUse.length - 1));
+    if (targetCurrencyCount>1) {
+      setTargetCurrencyCount(prevCount => prevCount - 1);
+      setCurrentTargetCurrencies((prevUse) => prevUse.slice(0, prevUse.length - 1));
+    }
   }
   
   // swap currency
   const swapCurrency = () => {
-    setSourceCurrency(targetCurrency);
-    setTargetCurrency(sourceCurrency);
+    setSwapAnimation(true);
+    const oriTarget = currentTargetCurrencies[0];
+    const oriSource = sourceCurrency;
+    setSourceCurrency(oriTarget);
+    // setTargetCurrency(sourceCurrency);
+    setCurrentTargetCurrencies((prevItem)=> {
+      let copyList = [...prevItem];
+      copyList[0] = oriSource;
+      return copyList
+    });
+  }
+
+  // disable swap animation
+  useEffect(()=> {
+    if (swapAnimation) {      
+      setTimeout(()=> {
+        setSwapAnimation(false)
+      },500);
+    }
+  },[swapAnimation]);
+
+  // GET the currency pair data (from server/local)
+  useEffect(()=> {  
+    // read all the data from session storage
+    if (sessionStorage.length) {
+      for (let i=0; i<sessionStorage.length; i++) {
+        const key = sessionStorage.key(i);
+        const val = sessionStorage.getItem(key)
+        // console.log("key",key,"val",val)
+        setCurrencyPair((prevPair)=>({
+          ...prevPair,
+          [key]:val
+        }))
+      }
+    }
+  },[]); // get the data from session storage
+  
+  useEffect(()=> {
+    console.log("currencyPair",JSON.stringify(currencyPair))
+  },[currencyPair])
+
+  const getCurrencyData = (sourceValue) => {
+    console.log("getting currency data")
+
+    if (currencyPair[sourceCurrency.value]) {
+      console.log(sourceCurrency.value,"1 to MYR =",JSON.parse(currencyPair[sourceCurrency.value])["MYR"])
+
+      // loop through all the target currency result
+      let calculationRes = []
+      for (let i=0; i<targetCurrencyCount; i++) {
+        const res = sourceValue*JSON.parse(currencyPair[sourceCurrency.value])[currentTargetCurrencies[i].value];
+        calculationRes.push(res.toFixed(2))
+      }
+      setSourceCurrencyValue(sourceValue) // improvement need to be made
+      setTargetCurrencyValue(calculationRes)
+    }
+    else { // not in local database, send to server
+      fetch(`/currency-exchange?currency=${sourceCurrency.value}`).then((res)=>res.json()).then((data)=>{
+        if (data["result"] === "success") {
+          sessionStorage.setItem(sourceCurrency.value, JSON.stringify(data["conversion_rates"])) // set the data to session storage
+
+          // loop through all the target currency result
+          let calculationRes = []
+          for (let i=0; i<targetCurrencyCount; i++) {
+            const res = sourceValue*data["conversion_rates"][currentTargetCurrencies[i].value];
+            calculationRes.push(res.toFixed(2))
+          }
+          setSourceCurrencyValue(sourceValue) // improvement need to be made
+          setTargetCurrencyValue(calculationRes)
+        }
+        else {
+          console.log("No data on server")
+          console.log(data)
+        }
+          
+      }).catch((error)=>{
+        console.error(error)
+      })
+    }
+    
+  }
+  
+  const updateTargetCurrencyList = (index,currency) => {
+    let copyList = [...currentTargetCurrencies]
+    copyList[index] = currency
+    setCurrentTargetCurrencies(copyList)
   }
 
   return (
     <div>
       <header>
       </header>
-      <body className='container'>
-        <div className='flex flex-col justify-center min-h-screen h-full items-center space-y-5'>
-          <div id="source-currency" className='basis-5/12'>
-            <CurrencyEditbox currencyContent={currencyContent} defaultCurrency={sourceCurrency} index={0} setGlobalCurrency={setSourceCurrency}></CurrencyEditbox>
+      <body className='min-h-screen h-full flex justify-center items-center bg-slate-50'>
+        <div className='flex flex-col justify-center items-center space-y-5 border border-hidden bg-green-200 rounded-xl px-5 py-10'>
+          <div id="source-currency" className=''>
+            <CurrencyEditbox currencyContent={currencyContent} defaultCurrency={sourceCurrency} index={0} setGlobalCurrency={setSourceCurrency} readonly={false} triggerFunction={getCurrencyData} currencyValue={sourceCurrencyValue}></CurrencyEditbox>
           </div>
-          <button title="swap currency" onClick={()=>{swapCurrency()}} className=' border w-10 h-10 flex items-center justify-center rounded-full'>
-            <FontAwesomeIcon icon="fa-solid fa-arrows-rotate" />
-          </button>
-          <div className="" id='target-currencies'>
+          <Button goto={swapCurrency} title="Swap currency" icon="fa-solid fa-arrows-rotate" animation={swapAnimation}></Button>
+          <div className="h-60 overflow-x-hidden y-scroll" id='target-currencies'>
             {/* loop the target currencies */}
             {
               Array.from({ length: targetCurrencyCount }).map((_, index) =>(
-                <CurrencyEditbox key={index} currencyContent={currencyContent} defaultCurrency={targetCurrency} setGlobalCurrency={setTargetCurrency} index={index} useDefaultCurrency={useTargetCurrency} setUseDefaultCurrency={setUseTargetCurrency}></CurrencyEditbox>
+                <div key={index} className='my-2'>
+                  <CurrencyEditbox key={index} currencyContent={currencyContent} index={index} defaultCurrency={currentTargetCurrencies[index]} updateCurrencyList={updateTargetCurrencyList} currencyValue={`${targetCurrencyValue[index]?targetCurrencyValue[index]:0}`}></CurrencyEditbox>
+                </div>
               ))
             }
-            {/* <CurrencyEditbox currencyContent={currencyContent}></CurrencyEditbox> */}
-            {/* <CurrencyEditbox currencyContent={currencyContent}></CurrencyEditbox> */}
           </div>
-          <button onClick={()=>{addCurrency()}} title="add currency" className=' border w-10 h-10 flex items-center justify-center rounded-full'>
-            <FontAwesomeIcon icon="fa-solid fa-add" />
-          </button>
-          <button onClick={()=>{removeCurrency()}} title="add currency" className=' border w-10 h-10 flex items-center justify-center rounded-full'>
-            <FontAwesomeIcon icon="fa-solid fa-minus" />
-          </button>
+          <div className='flex space-x-10'>
+            <Button goto={addCurrency} title="Add currency" icon="fa-solid fa-add"></Button>
+            <Button goto={removeCurrency} title="Remove currency" icon="fa-solid fa-minus"></Button>
+          </div>
         </div>
       </body>
     </div>
