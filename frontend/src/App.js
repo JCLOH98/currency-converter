@@ -15,7 +15,7 @@ import { far } from '@fortawesome/free-regular-svg-icons'
 
 function App() {
   library.add(fab, fas, far);
-  const [currencyContent, setCurrencyContent] = useState({}) // available currencies
+  const [currencyContent, setCurrencyContent] = useState([]) // available currencies
   
   //const [targetCurrencyCount, setTargetCurrencyCount] = useState(1) // amount of target currency
   const [currentTargetCurrencies, setCurrentTargetCurrencies] = useState([]) // array of true and false
@@ -45,7 +45,7 @@ function App() {
         //change to json for using react-select
         const contentJson = content.map((item)=>({
           label:<div className='flex flex-row justify-around h-21px'>
-            <img alt={item} className='border p-0.5 rounded' src={`https://flagcdn.com/28x21/${item.substring(0,2).toLowerCase()}.png`} width="28" height="21"/>
+            <img alt={item} className='border p-0.5 rounded w-full h-full' src={`https://flagcdn.com/28x21/${item.substring(0,2).toLowerCase()}.png`}/>
             <div className='ml-1'>{item}</div>
             </div>,
             value:item}))

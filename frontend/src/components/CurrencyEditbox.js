@@ -43,6 +43,8 @@ const CurrencyEditbox = ({currencyContent,defaultCurrency="",setGlobalCurrency=(
     })
   };
 
+  console.log(JSON.stringify(currencyContent))
+
   return (
       <div className="flex sm:flex-row sm:space-x-3 sm:space-y-0 sm:justify-center flex-col space-y-2 items-center mx-1">
         {/* map the currencies into option */}
