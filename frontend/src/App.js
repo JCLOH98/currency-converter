@@ -46,7 +46,7 @@ function App() {
         //change to array of JSON for using react-select
         const contentJson = content.map((item)=>({
           label:<div className='flex flex-row justify-around h-21px'>
-            <img alt={item} className='border p-0.5 rounded w-full h-full' src={`https://flagcdn.com/28x21/${item.substring(0,2).toLowerCase()}.png`}></img>
+            <img alt={item.replace("\r","")} className='border p-0.5 rounded' src={`https://flagcdn.com/28x21/${item.substring(0,2).toLowerCase()}.png`} width="28" height="21"/>
             <div className='ml-1'>{item.replace("\r","")}</div>
             </div>,
             value:item.replace("\r","")}))
@@ -145,7 +145,7 @@ function App() {
       setTargetCurrencyValue(calculationRes)
     }
     else { // not in local database, send to server
-      fetch(`/currency-exchange?currency=${sourceCurrency.value}`).then((res)=>res.json()).then((data)=>{
+      fetch(`/api/currency-exchange?currency=${sourceCurrency.value}`).then((res)=>res.json()).then((data)=>{
         if (data["result"] === "success") {
           sessionStorage.setItem(sourceCurrency.value, JSON.stringify(data["conversion_rates"])) // set the data to session storage
 

@@ -14,7 +14,7 @@ dotenv.config();
 const app=express();
 
 // Serve the React frontend app
-app.use(express.static(path.join(__dirname, '../frontend/build')));
+// app.use(express.static(path.join(__dirname, '../../frontend/build')));
 
 // Middleware to inject the API key
 app.use((req, res, next) => {
@@ -27,12 +27,11 @@ app.use(cors());  // Allow all origins
 
 // Catch-all to serve React app's static files
 // app.get('*', (req, res) => {
-//     res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+//     res.sendFile(path.join(__dirname, '../../frontend/build', 'index.html'));
 //   });
 
 // mockup currency exchange
-app.get("/currency-exchange",(req,res)=> {
-    console.log(req)
+app.get("/api/currency-exchange",(req,res)=> {
     if (req.query.currency=="USD") {
         // return json
         res.json({
@@ -386,7 +385,7 @@ app.get("/currency-exchange",(req,res)=> {
 })
 
 // GET data from server
-// app.get("/currency-exchange", async (req,res)=> {
+// app.get("/api/currency-exchange", async (req,res)=> {
 //     try {
 //         const response = await fetch(`https://v6.exchangerate-api.com/v6/${req.apiKey}/latest/${req.query.currency}`);
 
