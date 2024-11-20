@@ -40,8 +40,9 @@ function App() {
         let content = await response.text()
 
         // split the string in array (need to do twice as linux and window read file differntly)
-        content = content.split("\r\n")
-        content = content.split("\n")
+        console.log(JSON.stringify(content))
+        content = content.split("\r\n") //windows
+        // content = content.split("\n")
 
         //change to array of JSON for using react-select
         const contentJson = content.map((item)=>({
