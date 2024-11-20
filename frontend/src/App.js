@@ -41,12 +41,7 @@ function App() {
 
         // split the string in array (need to do twice as linux and window read file differntly)
         // split by \n, and replace \r if any
-        console.log(content)
         content = content.split("\n")
-        console.log(content.length)
-        console.log(content[0])
-        console.log(content[1])
-        console.log(content[2])
 
         //change to array of JSON for using react-select
         const contentJson = content.map((item)=>({
