@@ -40,9 +40,10 @@ function App() {
         let content = await response.text()
 
         // split the string in array (need to do twice as linux and window read file differntly)
+        // split by \n, and replace \r if any
         console.log(content)
+        content = content.split("\n")
         console.log(content.length)
-        content = content.split("\r\n")
         console.log(content[0])
         console.log(content[1])
         console.log(content[2])
@@ -51,9 +52,9 @@ function App() {
         const contentJson = content.map((item)=>({
           label:<div className='flex flex-row justify-around h-21px'>
             <img alt={item} className='border p-0.5 rounded w-full h-full' src={`https://flagcdn.com/28x21/${item.substring(0,2).toLowerCase()}.png`}></img>
-            <div className='ml-1'>{item}</div>
+            <div className='ml-1'>{item.replace("\r","")}</div>
             </div>,
-            value:item}))
+            value:item.replace("\r","")}))
 
         setCurrencyContent(contentJson);
       }
