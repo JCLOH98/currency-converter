@@ -31,7 +31,7 @@ app.use(cors());  // Allow all origins
 //   });
 
 // mockup currency exchange
-app.get("/api/currency-exchange",(req,res)=> {
+app.get("/currency-exchange",(req,res)=> {
     if (req.query.currency=="USD") {
         // return json
         res.json({

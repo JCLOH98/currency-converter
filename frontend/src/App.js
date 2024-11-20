@@ -145,7 +145,7 @@ function App() {
       setTargetCurrencyValue(calculationRes)
     }
     else { // not in local database, send to server
-      fetch(`/api/currency-exchange?currency=${sourceCurrency.value}`).then((res)=>res.json()).then((data)=>{
+      fetch(`${process.env.REACT_APP_BACKEND_URI}/currency-exchange?currency=${sourceCurrency.value}`).then((res)=>res.json()).then((data)=>{
         if (data["result"] === "success") {
           sessionStorage.setItem(sourceCurrency.value, JSON.stringify(data["conversion_rates"])) // set the data to session storage
 
