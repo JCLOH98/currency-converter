@@ -4,6 +4,8 @@ const express=require('express');
 const dotenv = require('dotenv');
 const path = require('path');
 const port = process.env.PORT || 5000;
+const cors = require('cors');
+
 
 // Load environment variables from .env file
 dotenv.config();
@@ -12,13 +14,16 @@ dotenv.config();
 const app=express();
 
 // Serve the React frontend app
-// app.use(express.static(path.join(__dirname, '../build')));
+app.use(express.static(path.join(__dirname, '../build')));
 
 // Middleware to inject the API key
 app.use((req, res, next) => {
     req.apiKey = process.env.EXCHANGE_RATE_API_KEY; // Attach the API key to the
     next(); // Proceed to the next middleware or route
   });
+
+app.use(cors());  // Allow all origins
+
 
 // Catch-all to serve React app's static files
 // app.get('*', (req, res) => {
@@ -27,6 +32,7 @@ app.use((req, res, next) => {
 
 // mockup currency exchange
 app.get("/currency-exchange",(req,res)=> {
+    console.log(req)
     if (req.query.currency=="USD") {
         // return json
         res.json({
