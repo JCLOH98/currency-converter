@@ -1,6 +1,7 @@
 {
-  "short_name": "Currency Converter",
+  "short_name": "Currency Converter by JCLOH98",
   "name": "Currency Converter",
+  "description": "Currency Converter by JCLOH98 is a user-friendly tool that enables seamless conversion of a single currency into multiple other currencies, offering real-time exchange rates for efficient financial transactions.",
   "icons": [
     {
       "src": "favicon.ico",
