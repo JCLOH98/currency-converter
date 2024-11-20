@@ -5,12 +5,19 @@ import './App.css';
 import CurrencyEditbox from './components/CurrencyEditbox';
 import Button from './components/Button';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { library } from '@fortawesome/fontawesome-svg-core'
+// import your icons
+import { fab } from '@fortawesome/free-brands-svg-icons'
+import { fas } from '@fortawesome/free-solid-svg-icons'
+import { far } from '@fortawesome/free-regular-svg-icons'
+
+
 function App() {
-  
-  // variables
+  library.add(fab, fas, far);
   const [currencyContent, setCurrencyContent] = useState({}) // available currencies
   
-  const [targetCurrencyCount, setTargetCurrencyCount] = useState(1) // amount of target currency
+  //const [targetCurrencyCount, setTargetCurrencyCount] = useState(1) // amount of target currency
   const [currentTargetCurrencies, setCurrentTargetCurrencies] = useState([]) // array of true and false
   const [swapAnimation, setSwapAnimation] = useState(false);
 
@@ -20,6 +27,10 @@ function App() {
   const [targetCurrencyValue, setTargetCurrencyValue] = useState([])
   const [currencyPair, setCurrencyPair] = useState({})
 
+  // for error use
+  const [errorMessage, setErrorMessage] = useState("")
+  const [errorVisible,setErrorVisible] = useState(false)
+  
   // currency pair data
   // read the currencies file
   useEffect(()=> {
@@ -65,14 +76,14 @@ function App() {
 
   // add the target currency
   const addCurrency = () => {
-    setTargetCurrencyCount(prevCount => prevCount + 1);
+    // setTargetCurrencyCount(prevCount => prevCount + 1);
     setCurrentTargetCurrencies((prevUse) => [...prevUse, [...prevUse][0]]);
   }
 
   // remove the target currency
   const removeCurrency = () => {
-    if (targetCurrencyCount>1) {
-      setTargetCurrencyCount(prevCount => prevCount - 1);
+    if (currentTargetCurrencies.length>1) {
+      // setTargetCurrencyCount(prevCount => prevCount - 1);
       setCurrentTargetCurrencies((prevUse) => prevUse.slice(0, prevUse.length - 1));
     }
   }
@@ -116,23 +127,20 @@ function App() {
     }
   },[]); // get the data from session storage
   
-  useEffect(()=> {
-    console.log("currencyPair",JSON.stringify(currencyPair))
-  },[currencyPair])
+  // useEffect(()=> {
+  //   console.log("currencyPair",JSON.stringify(currencyPair))
+  // },[currencyPair])
 
-  const getCurrencyData = (sourceValue) => {
-    console.log("getting currency data")
-
+  const getCurrencyData = (showError=true) => {
     if (currencyPair[sourceCurrency.value]) {
-      console.log(sourceCurrency.value,"1 to MYR =",JSON.parse(currencyPair[sourceCurrency.value])["MYR"])
+      // console.log(sourceCurrency.value,"1 to MYR =",JSON.parse(currencyPair[sourceCurrency.value])["MYR"])
 
       // loop through all the target currency result
       let calculationRes = []
-      for (let i=0; i<targetCurrencyCount; i++) {
-        const res = sourceValue*JSON.parse(currencyPair[sourceCurrency.value])[currentTargetCurrencies[i].value];
+      for (let i=0; i<currentTargetCurrencies.length; i++) {
+        const res = sourceCurrencyValue*JSON.parse(currencyPair[sourceCurrency.value])[currentTargetCurrencies[i].value];
         calculationRes.push(res.toFixed(2))
       }
-      setSourceCurrencyValue(sourceValue) // improvement need to be made
       setTargetCurrencyValue(calculationRes)
     }
     else { // not in local database, send to server
@@ -142,24 +150,50 @@ function App() {
 
           // loop through all the target currency result
           let calculationRes = []
-          for (let i=0; i<targetCurrencyCount; i++) {
-            const res = sourceValue*data["conversion_rates"][currentTargetCurrencies[i].value];
+          for (let i=0; i<currentTargetCurrencies.length; i++) {
+            const res = sourceCurrencyValue*data["conversion_rates"][currentTargetCurrencies[i].value];
             calculationRes.push(res.toFixed(2))
           }
-          setSourceCurrencyValue(sourceValue) // improvement need to be made
           setTargetCurrencyValue(calculationRes)
         }
         else {
-          console.log("No data on server")
-          console.log(data)
+          throw new Error(`Failed to fetch data`);
         }
           
       }).catch((error)=>{
-        console.error(error)
+        if (showError) {
+          setErrorMessage(error.message)
+          setErrorVisible(true)
+        }
+        // console.error("ERROR",error)
+        
       })
     }
     
   }
+  useEffect(()=>{
+    if (errorVisible) {
+      setTimeout(()=>{
+        setErrorVisible(false)
+      },5000);
+    }
+  },[errorVisible])
+
+  useEffect(()=>{
+    if (parseFloat(sourceCurrencyValue)) {
+      getCurrencyData();
+    }
+  },[sourceCurrencyValue])
+
+  useEffect(()=>{
+    // console.log("currentTargetCurrencies",currentTargetCurrencies)
+    // console.log("currentTargetCurrencies length",currentTargetCurrencies.length)
+    if (currentTargetCurrencies.length && sourceCurrency !== ""){
+      if (currentTargetCurrencies[currentTargetCurrencies.length-1] !== ""){
+        getCurrencyData();
+      }
+    }
+  },[currentTargetCurrencies,sourceCurrency])
   
   const updateTargetCurrencyList = (index,currency) => {
     let copyList = [...currentTargetCurrencies]
@@ -171,16 +205,17 @@ function App() {
     <div>
       <header>
       </header>
-      <body className='min-h-screen h-full flex justify-center items-center bg-slate-50'>
-        <div className='flex flex-col justify-center items-center space-y-5 border border-hidden bg-green-200 rounded-xl px-5 py-10'>
+      <body className='min-h-screen h-full flex flex-col justify-center items-center bg-emerald-600 font-lexend'>
+        <div class="font-bold m-2 text-center text-emerald-950">Currency Converter by <a target="blank" href="https://jcloh-98.web.app/" className='underline'>JCLOH98</a></div>
+        <div className='flex flex-col justify-center items-center space-y-5 border border-hidden bg-green-300 rounded-xl px-5 py-10'>
           <div id="source-currency" className=''>
-            <CurrencyEditbox currencyContent={currencyContent} defaultCurrency={sourceCurrency} index={0} setGlobalCurrency={setSourceCurrency} readonly={false} triggerFunction={getCurrencyData} currencyValue={sourceCurrencyValue}></CurrencyEditbox>
+            <CurrencyEditbox currencyContent={currencyContent} defaultCurrency={sourceCurrency} index={0} setGlobalCurrency={setSourceCurrency} readonly={false} currencyValue={sourceCurrencyValue} setSourceCurrencyValue={setSourceCurrencyValue}></CurrencyEditbox>
           </div>
           <Button goto={swapCurrency} title="Swap currency" icon="fa-solid fa-arrows-rotate" animation={swapAnimation}></Button>
-          <div className="h-60 overflow-x-hidden y-scroll" id='target-currencies'>
+          <div className="sm:h-60 h-32 overflow-x-hidden y-scroll" id='target-currencies'>
             {/* loop the target currencies */}
             {
-              Array.from({ length: targetCurrencyCount }).map((_, index) =>(
+              currentTargetCurrencies.map((_, index) =>(
                 <div key={index} className='my-2'>
                   <CurrencyEditbox key={index} currencyContent={currencyContent} index={index} defaultCurrency={currentTargetCurrencies[index]} updateCurrencyList={updateTargetCurrencyList} currencyValue={`${targetCurrencyValue[index]?targetCurrencyValue[index]:0}`}></CurrencyEditbox>
                 </div>
@@ -190,6 +225,18 @@ function App() {
           <div className='flex space-x-10'>
             <Button goto={addCurrency} title="Add currency" icon="fa-solid fa-add"></Button>
             <Button goto={removeCurrency} title="Remove currency" icon="fa-solid fa-minus"></Button>
+          </div>
+        </div>
+        <div className={`${errorVisible?"block":"hidden"} 
+        bg-slate-50 text-red-400 rounded fixed break-words p-2 text-center border-red-400 border-2`}>
+          <div className=' font-bold'>Please contact the developer</div>
+          <div>Error: {errorMessage}</div>
+        </div>
+
+        <div className='fixed bottom-5 right-5 bg-green-300 w-10 h-10 sm:w-14 sm:h-14 rounded-full border border-emerald-600 flex items-center justify-center group'>
+          <FontAwesomeIcon className='w-5 h-5 sm:w-7 sm:h-7' icon="fa-solid fa-address-book" />
+          <div className='absolute border rounded opacity-0 group-hover:opacity-100 bg-slate-50 text-center sm:right-7 sm:bottom-7 sm:px-2 -left-20 bottom-5 right-5 px-1'>
+            <a target="blank" className='sm:text-md text-xs font-bold text-emerald-950' href="https://forms.gle/oTmmZedRWva3qzqg6">Report Issue</a>
           </div>
         </div>
       </body>

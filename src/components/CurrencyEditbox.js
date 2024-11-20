@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import Select from 'react-select';
-const CurrencyEditbox = ({currencyContent,defaultCurrency="",setGlobalCurrency=()=>{},index, updateCurrencyList=()=>{},readonly=true,triggerFunction=()=>{},currencyValue=0}) => {
+const CurrencyEditbox = ({currencyContent,defaultCurrency="",setGlobalCurrency=()=>{},index, updateCurrencyList=()=>{},readonly=true,triggerFunction=()=>{},currencyValue=0,setSourceCurrencyValue=()=>{}}) => {
 
   // local currency
   const [currency,setCurrency] = useState("");
@@ -39,21 +39,18 @@ const CurrencyEditbox = ({currencyContent,defaultCurrency="",setGlobalCurrency=(
     }),
     input: (provided)=> ({
       ...provided,
-      paddingLeft: "2rem", 
+      paddingLeft: "2rem",
     })
   };
 
   return (
-      <div className="flex flex-row space-x-3 items-center justify-center mx-1">
+      <div className="flex sm:flex-row sm:space-x-3 sm:space-y-0 sm:justify-center flex-col space-y-2 items-center mx-1">
         {/* map the currencies into option */}
         <Select className='w-32' options={currencyContent} placeholder="Currency" defaultValue={currency} value={currency} onChange={onCurrencyChange} menuPosition='fixed' styles={selectStyle}>
         </Select>
-        <input readOnly={readonly} type="number" onInput={(event)=>{
-          // source-currency: get the value 
-          // target-currency: calculate and set the value
-          console.log(event.target.value)
-          triggerFunction(event.target.value);
-        }} className="border-none rounded-full w-60 h-10 px-5 outline-none" value={currencyValue}></input>
+        <input readOnly={false} type={"number"} onInput={(event)=>{
+          setSourceCurrencyValue(event.target.value);
+        }} className="border-none rounded-full w-40 h-10 outline-none text-center" value={currencyValue}></input>
       </div>
     
   )

@@ -10,7 +10,7 @@ import { far } from '@fortawesome/free-regular-svg-icons'
 const Button = ({icon,title,goto,animation=false}) => {
     library.add(fab, fas, far);
     return (
-        <button onClick={goto} title={title} className="border-none w-10 h-10 flex items-center justify-center rounded-full bg-slate-50 ">
+        <button type="button" onClick={goto} title={title} className="border-none w-10 h-10 flex items-center justify-center rounded-full bg-slate-50">
             <FontAwesomeIcon className={`${animation?"animate-spin":""}`} icon={icon} />
         </button>
     )
