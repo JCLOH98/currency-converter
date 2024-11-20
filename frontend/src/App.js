@@ -39,13 +39,14 @@ function App() {
       if (response.ok) {
         let content = await response.text()
 
-        // split the string in array
+        // split the string in array (need to do twice as linux and window read file differntly)
         content = content.split("\r\n")
+        content = content.split("\n")
 
-        //change to json for using react-select
+        //change to array of JSON for using react-select
         const contentJson = content.map((item)=>({
           label:<div className='flex flex-row justify-around h-21px'>
-            <img alt={item} className='border p-0.5 rounded w-full h-full' src={`https://flagcdn.com/28x21/${item.substring(0,2).toLowerCase()}.png`}/>
+            <img alt={item} className='border p-0.5 rounded w-full h-full' src={`https://flagcdn.com/28x21/${item.substring(0,2).toLowerCase()}.png`}></img>
             <div className='ml-1'>{item}</div>
             </div>,
             value:item}))
