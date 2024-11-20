@@ -14,7 +14,7 @@ dotenv.config();
 const app=express();
 
 // Serve the React frontend app
-app.use(express.static(path.join(__dirname, '../build')));
+// app.use(express.static(path.join(__dirname, '../build')));
 
 // Middleware to inject the API key
 app.use((req, res, next) => {
