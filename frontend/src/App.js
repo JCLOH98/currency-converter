@@ -181,20 +181,14 @@ function App() {
   },[errorVisible])
 
   useEffect(()=>{
-    if (parseFloat(sourceCurrencyValue)) {
-      getCurrencyData();
-    }
-  },[sourceCurrencyValue])
-
-  useEffect(()=>{
     // console.log("currentTargetCurrencies",currentTargetCurrencies)
     // console.log("currentTargetCurrencies length",currentTargetCurrencies.length)
-    if (currentTargetCurrencies.length && sourceCurrency !== ""){
+    if (currentTargetCurrencies.length && sourceCurrency !== "" && parseFloat(sourceCurrencyValue)){
       if (currentTargetCurrencies[currentTargetCurrencies.length-1] !== ""){
         getCurrencyData();
       }
     }
-  },[currentTargetCurrencies,sourceCurrency])
+  },[currentTargetCurrencies,sourceCurrency,sourceCurrencyValue])
   
   const updateTargetCurrencyList = (index,currency) => {
     let copyList = [...currentTargetCurrencies]
