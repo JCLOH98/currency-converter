@@ -12,6 +12,8 @@ import { fab } from '@fortawesome/free-brands-svg-icons'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 import { far } from '@fortawesome/free-regular-svg-icons'
 
+import { Analytics } from '@vercel/analytics/next';
+
 
 function App() {
   library.add(fab, fas, far);
@@ -234,6 +236,7 @@ function App() {
             <a target="blank" className='sm:text-md text-xs font-bold text-emerald-950' href="https://forms.gle/oTmmZedRWva3qzqg6">Report Issue</a>
           </div>
         </div>
+        <Analytics />
       </body>
     </div>
   );
